@@ -1,0 +1,15 @@
+.tags*
+.DS_Store
+Thumbs.db
+/.idea
+*.iml
+.terraform*
+.*swp
+*.retry
+crash.log
+terraform.tfstate*
+openrc
+*.pem
+variables.tf
+*.credentials
+flocker-client*

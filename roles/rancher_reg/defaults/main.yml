@@ -1,0 +1,6 @@
+---
+
+rancher_server: 127.0.0.1
+rancher_port: 80
+rancher_agent_name: "agent"
+rancher_agent_version: 1.1.3

@@ -1,0 +1,64 @@
+---
+- name: "Create temporary groups based on name"
+  hosts: all
+  gather_facts: true
+  become: true
+  vars_files:
+      - vars.yml
+  tasks:
+  - name: Adding dynamic group of masters
+    add_host: name={{ item }} groups=rancher
+    with_lines: ansible  all -m shell -a "hostname" --list -l '~demo-rancher-minimal-server*' | grep 172 | sed -e 's/^[ \t]*//g'
+    run_once: true
+    delegate_to: localhost
+
+  - name: Adding dynamic group of nodes
+    add_host: name={{ item }} groups=nodes
+    with_lines: ansible  all -m shell -a "hostname" --list -l '~demo-rancher-minimal-host*' | grep 172 | sed -e 's/^[ \t]*//g'
+    run_once: true
+    delegate_to: localhost
+
+  - name: Store Rancher IP address
+    set_fact:
+      rancher_server: "{{ hostvars[groups['rancher'][0]]['ansible_default_ipv4']['address'] }}"
+    run_once: true
+    delegate_to: localhost
+
+- name: Package provision
+  hosts: all
+  become: true
+  tasks:
+  - name: Wait for cloudinit (docker up)
+    wait_for:
+      path: /var/run/docker.sock
+      state: present
+
+  - name: Install httplib2
+    yum:
+        name=python-httplib2
+        update_cache=yes
+
+  - name: Install python2-pip
+    yum:
+        name=python2-pip
+        update_cache=yes
+
+  - name: Install docker-py
+    pip:
+      name: docker-py
+
+- name: Setting up Rancher Server
+  hosts: "rancher"
+  become: true
+  vars_files:
+      - vars.yml
+  roles:
+    - { role: rancher, tags: ["rancher"] }
+
+- name: Register Rancher Hosts
+  hosts: "nodes"
+  become: yes
+  vars_files:
+      - vars.yml
+  roles:
+    - { role: rancher_reg, tags: ["rancher_reg"] }
