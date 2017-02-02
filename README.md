@@ -62,3 +62,6 @@ rancher-compose up --force-upgrade
 rancher-compose down
 rancher-compose rm
 ```
+
+# Credits
+- https://github.com/galal-hussein/Rancher-Ansible  - Ansible role for Rancher (just small modification for CentOS)
